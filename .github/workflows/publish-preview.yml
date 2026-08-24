@@ -1,0 +1,30 @@
+name: Publish preview assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .release-staging/v1.0.0-local/**
+      - .github/workflows/publish-preview.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Replace preview release assets and notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload v1.0.0-local \
+            .release-staging/v1.0.0-local/ex2-charge-agent-1.0.0-local-debug.apk \
+            .release-staging/v1.0.0-local/ex2-charge-controller-1.0.0-local-debug.apk \
+            .release-staging/v1.0.0-local/SHA256SUMS \
+            --clobber
+          gh release edit v1.0.0-local \
+            --title "Geely EX2 Charge Control v1.0.0-local (Preview)" \
+            --notes-file .release-staging/v1.0.0-local/RELEASE_NOTES.md \
+            --prerelease
